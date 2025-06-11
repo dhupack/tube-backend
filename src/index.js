@@ -6,6 +6,18 @@ dotenv.config({path: './env'})
 
 // SECOND APPROACH (BETTER APPROACH) -> ek alag folder m sara code likhe or vha se export kraye or index file me sirf us function ko import kraye
 connectDB()
+.then(() => {
+    app.on("error", (error) => {
+            console.log("ERROR: ", error);
+            throw error
+        })
+    app.listen(process.env.PORT || 8000, () => {
+        console.log(` Server is running at port : ${process.env.PORT}`);
+    })
+})
+.catch((err) => {
+    console.log("MONGODB connection failed !!! ", err);
+})
 
 
 
