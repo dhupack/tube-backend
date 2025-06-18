@@ -2,7 +2,7 @@
 import dotenv from "dotenv"
 import connectDB from "./db/index.js";
 import {app} from './app.js'
-dotenv.config({path: './env'})
+dotenv.config({path: './.env'})
 
 // SECOND APPROACH (BETTER APPROACH) -> ek alag folder m sara code likhe or vha se export kraye or index file me sirf us function ko import kraye
 connectDB()
