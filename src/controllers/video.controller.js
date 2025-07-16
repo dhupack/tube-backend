@@ -9,28 +9,22 @@ import {uploadOnCloudinary} from "../utils/cloudinary.js"
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
-    //TODO: get all videos based on query, sort, pagination
-    // Step 2: Prepare match stage to filter videos
     const matchStage = {
         isPublished: true
     };
 
-    // Step 3: Add search filter (if title query is present)
     if (query) {
         matchStage.title = { $regex: query, $options: "i" }; // case-insensitive search
     }
 
-    // Step 4: Add user filter (if userId is valid)
     if (userId && isValidObjectId(userId)) {
         matchStage.owner = new mongoose.Types.ObjectId(userId);
     }
 
-    // Step 5: Define sorting condition
     const sortStage = {
         [sortBy]: sortType === "asc" ? 1 : -1
     };
 
-    // Step 6: Build aggregation pipeline to fetch and populate videos
     const aggregateQuery = Video.aggregate([
         { $match: matchStage },
         {
@@ -45,16 +39,13 @@ const getAllVideos = asyncHandler(async (req, res) => {
         { $sort: sortStage }                 // Apply sorting
     ]);
 
-    // Step 7: Pagination settings
     const options = {
         page: parseInt(page),
         limit: parseInt(limit)
     };
 
-    // Step 8: Execute the paginated aggregate query
     const result = await Video.aggregatePaginate(aggregateQuery, options);
 
-    // Step 9: Return the response
     return res
     .status(200)
     .json(
@@ -63,42 +54,35 @@ const getAllVideos = asyncHandler(async (req, res) => {
 })
 
 const publishAVideo = asyncHandler(async (req, res) => {
-    // Step 1: Get required data from body and files
     const { title, description} = req.body
-    // TODO: get video, upload to cloudinary, create video
     const videoFile = req.files?.videoFile;
     const thumbnail = req.files?.thumbnail;
 
-    // Step 2: Validate input
     if (!title || !description || !videoFile || !thumbnail) {
         throw new ApiError(400, "All fields (title, description, video, thumbnail) are required");
     }
 
-    // Step 3: Upload video to Cloudinary
     const uploadedVideo = await uploadOnCloudinary(videoFile.tempFilePath, "video");
 
     if (!uploadedVideo || !uploadedVideo.secure_url) {
         throw new ApiError(500, "Video upload to Cloudinary failed");
     }
 
-    // Step 4: Upload thumbnail to Cloudinary
     const uploadedThumbnail = await uploadOnCloudinary(thumbnail.tempFilePath, "image");
 
     if (!uploadedThumbnail || !uploadedThumbnail.secure_url) {
         throw new ApiError(500, "Thumbnail upload to Cloudinary failed");
     }
 
-    // Step 5: Create new video document in MongoDB
     const newVideo = await Video.create({
         title,
         description,
         videoFile: uploadedVideo.secure_url,
         thumbnail: uploadedThumbnail.secure_url,
-        duration: uploadedVideo.duration, // duration comes from Cloudinary
-        owner: req.user._id // logged-in user's ID
+        duration: uploadedVideo.duration,
+        owner: req.user._id
     });
 
-    // Step 6: Return response
     return res
     .status(201)
     .json(
@@ -107,29 +91,22 @@ const publishAVideo = asyncHandler(async (req, res) => {
 })
 
 const getVideoById = asyncHandler(async (req, res) => {
-    // Step 1: Extract videoId from URL parameters
     const { videoId } = req.params
-    //TODO: get video by id
-    
-    // Step 2: Validate if videoId is a valid MongoDB ObjectId
+
     if (!isValidObjectId(videoId)) {
         throw new ApiError(400, "Invalid video ID");
     }
 
-    // Step 3: Find the video from the database and populate owner info
     const video = await Video.findById(videoId).populate("owner", "username fullName avatar");
 
-    // Step 4: If video not found, return 404
     if (!video) {
         throw new ApiError(404, "Video not found");
     }
 
-    // Step 5: If video is private (not published) and user is not the owner, deny access
     if (!video.isPublished && (!req.user || video.owner._id.toString() !== req.user._id.toString())) {
         throw new ApiError(403, "You are not allowed to view this video");
     }
 
-    // Step 6: Send the video info in the response
     return res
     .status(200)
     .json(
