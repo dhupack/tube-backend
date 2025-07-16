@@ -7,7 +7,6 @@ import {asyncHandler} from "../utils/asyncHandler.js"
 
 const createPlaylist = asyncHandler(async (req, res) => {
     const {name, description} = req.body
-    //TODO: create playlist
     if (!name || !description) {
         throw new ApiError(400, "Name and description are required");
     }
@@ -15,7 +14,7 @@ const createPlaylist = asyncHandler(async (req, res) => {
     const playlist = await Playlist.create({
         name,
         description,
-        owner: req.user._id // assuming req.user is set via auth middleware
+        owner: req.user._id 
     });
 
     return res
@@ -28,7 +27,6 @@ const createPlaylist = asyncHandler(async (req, res) => {
 
 const getUserPlaylists = asyncHandler(async (req, res) => {
     const {userId} = req.params
-    //TODO: get user playlists
     if (!isValidObjectId(userId)) {
         throw new ApiError(400, "Invalid user ID");
     }
@@ -44,7 +42,6 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
 
 const getPlaylistById = asyncHandler(async (req, res) => {
     const {playlistId} = req.params
-    //TODO: get playlist by id
     if (!isValidObjectId(playlistId)) {
         throw new ApiError(400, "Invalid playlist ID");
     }
@@ -90,7 +87,6 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
 
 const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     const {playlistId, videoId} = req.params
-    // TODO: remove video from playlist
     if (!isValidObjectId(playlistId) || !isValidObjectId(videoId)) {
         throw new ApiError(400, "Invalid playlist or video ID");
     }
@@ -116,7 +112,6 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
 
 const deletePlaylist = asyncHandler(async (req, res) => {
     const {playlistId} = req.params
-    // TODO: delete playlist
     if (!isValidObjectId(playlistId)) {
         throw new ApiError(400, "Invalid playlist ID");
     }
@@ -137,7 +132,6 @@ const deletePlaylist = asyncHandler(async (req, res) => {
 const updatePlaylist = asyncHandler(async (req, res) => {
     const {playlistId} = req.params
     const {name, description} = req.body
-    //TODO: update playlist
     if (!isValidObjectId(playlistId)) {
         throw new ApiError(400, "Invalid playlist ID");
     }
