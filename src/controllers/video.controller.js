@@ -55,20 +55,20 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
 const publishAVideo = asyncHandler(async (req, res) => {
     const { title, description} = req.body
-    const videoFile = req.files?.videoFile;
-    const thumbnail = req.files?.thumbnail;
+    const videoFile = req.files?.videoFile?.[0];
+    const thumbnail = req.files?.thumbnail?.[0];
 
     if (!title || !description || !videoFile || !thumbnail) {
         throw new ApiError(400, "All fields (title, description, video, thumbnail) are required");
     }
 
-    const uploadedVideo = await uploadOnCloudinary(videoFile.tempFilePath, "video");
+    const uploadedVideo = await uploadOnCloudinary(videoFile.path);
 
     if (!uploadedVideo || !uploadedVideo.secure_url) {
         throw new ApiError(500, "Video upload to Cloudinary failed");
     }
 
-    const uploadedThumbnail = await uploadOnCloudinary(thumbnail.tempFilePath, "image");
+    const uploadedThumbnail = await uploadOnCloudinary(thumbnail.path);
 
     if (!uploadedThumbnail || !uploadedThumbnail.secure_url) {
         throw new ApiError(500, "Thumbnail upload to Cloudinary failed");

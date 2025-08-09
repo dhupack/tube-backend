@@ -5,7 +5,7 @@ import {ApiResponse} from "../utils/ApiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 
 const toggleVideoLike = asyncHandler(async (req, res) => {
-    const {videoId} = req.params
+    const {videoId} = req.body;
     const userId = req.user._id;
 
     if (!isValidObjectId(videoId)) {
